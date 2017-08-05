@@ -35,5 +35,7 @@
 	<string>Launcher</string>
 	<key>NSPrincipalClass</key>
 	<string>SDLApplication</string>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
+	<true/>
 </dict>
 </plist>
