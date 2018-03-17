@@ -955,7 +955,7 @@ void *SZ_GetSpace (sizebuf_t *buf, int length)
 	if (buf->cursize + length > buf->maxsize)
 	{
 		if (!buf->allowoverflow)
-			Sys_Error ("SZ_GetSpace: overflow without allowoverflow set");
+			Host_Error ("SZ_GetSpace: overflow without allowoverflow set"); // ericw -- made Host_Error to be less annoying
 
 		if (length > buf->maxsize)
 			Sys_Error ("SZ_GetSpace: %i is > full buffer size", length);
@@ -1289,7 +1289,11 @@ static void COM_CheckRegistered (void)
 		Cvar_SetROM ("registered", "0");
 		Con_Printf ("Playing shareware version.\n");
 		if (com_modified)
-			Sys_Error ("You must have the registered version to use modified games");
+			Sys_Error ("You must have the registered version to use modified games.\n\n"
+				   "Basedir is: %s\n\n"
+				   "Check that this has an " GAMENAME " subdirectory containing pak0.pak and pak1.pak, "
+				   "or use the -basedir command-line option to specify another directory.",
+				   com_basedir);
 		return;
 	}
 

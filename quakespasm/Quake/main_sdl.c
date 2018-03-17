@@ -108,6 +108,8 @@ int main(int argc, char *argv[])
 	parms.argc = argc;
 	parms.argv = argv;
 
+	parms.errstate = 0;
+
 	COM_InitArgv(parms.argc, parms.argv);
 
 	isDedicated = (COM_CheckParm("-dedicated") != 0);
@@ -180,7 +182,7 @@ int main(int argc, char *argv[])
 
 		Host_Frame (time);
 
-		if (time < sys_throttle.value)
+		if (time < sys_throttle.value && !cls.timedemo)
 			SDL_Delay(1);
 
 		oldtime = newtime;

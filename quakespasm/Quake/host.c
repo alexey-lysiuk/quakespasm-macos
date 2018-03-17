@@ -100,6 +100,17 @@ static void Max_Edicts_f (cvar_t *var)
 
 /*
 ================
+Max_Fps_f -- ericw
+================
+*/
+static void Max_Fps_f (cvar_t *var)
+{
+	if (var->value > 72)
+		Con_Warning ("host_maxfps above 72 breaks physics.\n");
+}
+
+/*
+================
 Host_EndGame
 ================
 */
@@ -245,6 +256,7 @@ void Host_InitLocal (void)
 	Cvar_RegisterVariable (&host_framerate);
 	Cvar_RegisterVariable (&host_speeds);
 	Cvar_RegisterVariable (&host_maxfps); //johnfitz
+	Cvar_SetCallback (&host_maxfps, Max_Fps_f);
 	Cvar_RegisterVariable (&host_timescale); //johnfitz
 
 	Cvar_RegisterVariable (&max_edicts); //johnfitz
@@ -290,7 +302,7 @@ void Host_WriteConfiguration (void)
 
 // dedicated servers initialize the host but don't parse and set the
 // config.cfg cvars
-	if (host_initialized & !isDedicated)
+	if (host_initialized && !isDedicated && !host_parms->errstate)
 	{
 		f = fopen (va("%s/config.cfg", com_gamedir), "w");
 		if (!f)
@@ -299,7 +311,7 @@ void Host_WriteConfiguration (void)
 			return;
 		}
 
-		VID_SyncCvars (); //johnfitz -- write actual current mode to config file, in case cvars were messed with
+		//VID_SyncCvars (); //johnfitz -- write actual current mode to config file, in case cvars were messed with
 
 		Key_WriteBindings (f);
 		Cvar_WriteVariables (f);
@@ -310,23 +322,6 @@ void Host_WriteConfiguration (void)
 		//johnfitz
 
 		fclose (f);
-
-//johnfitz -- also save fitzquake.rc
-#if 0
-		f = fopen (va("%s/fitzquake.rc", GAMENAME), "w"); //always save in id1
-		if (!f)
-		{
-			Con_Printf ("Couldn't write fitzquake.rc.\n");
-			return;
-		}
-
-		Cvar_WriteVariables (f);
-		fprintf (f, "vid_restart\n");
-		if (in_mlook.state & 1) fprintf (f, "+mlook\n");
-
-		fclose (f);
-#endif
-//johnfitz
 	}
 }
 

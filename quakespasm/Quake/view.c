@@ -60,6 +60,12 @@ cvar_t	v_idlescale = {"v_idlescale", "0", CVAR_NONE};
 cvar_t	crosshair = {"crosshair", "0", CVAR_ARCHIVE};
 
 cvar_t	gl_cshiftpercent = {"gl_cshiftpercent", "100", CVAR_NONE};
+cvar_t	gl_cshiftpercent_contents = {"gl_cshiftpercent_contents", "100", CVAR_NONE}; // QuakeSpasm
+cvar_t	gl_cshiftpercent_damage = {"gl_cshiftpercent_damage", "100", CVAR_NONE}; // QuakeSpasm
+cvar_t	gl_cshiftpercent_bonus = {"gl_cshiftpercent_bonus", "100", CVAR_NONE}; // QuakeSpasm
+cvar_t	gl_cshiftpercent_powerup = {"gl_cshiftpercent_powerup", "100", CVAR_NONE}; // QuakeSpasm
+
+cvar_t	r_viewmodel_quake = {"r_viewmodel_quake", "0", CVAR_ARCHIVE};
 
 float	v_dmg_time, v_dmg_roll, v_dmg_pitch;
 
@@ -427,6 +433,12 @@ void V_CalcBlend (void)
 {
 	float	r, g, b, a, a2;
 	int		j;
+	cvar_t	*cshiftpercent_cvars[NUM_CSHIFTS] = {
+		&gl_cshiftpercent_contents,
+		&gl_cshiftpercent_damage,
+		&gl_cshiftpercent_bonus,
+		&gl_cshiftpercent_powerup
+	};
 
 	r = 0;
 	g = 0;
@@ -444,6 +456,9 @@ void V_CalcBlend (void)
 		//johnfitz
 
 		a2 = ((cl.cshifts[j].percent * gl_cshiftpercent.value) / 100.0) / 255.0;
+		// QuakeSpasm -- also scale by the specific gl_cshiftpercent_* cvar
+		a2 *= (cshiftpercent_cvars[j]->value / 100.0);
+		// QuakeSpasm
 		if (!a2)
 			continue;
 		a = a + a2*(1-a);
@@ -788,6 +803,18 @@ void V_CalcRefdef (void)
 	view->origin[2] += bob;
 
 	//johnfitz -- removed all gun position fudging code (was used to keep gun from getting covered by sbar)
+	//MarkV -- restored this with r_viewmodel_quake cvar
+	if (r_viewmodel_quake.value)
+	{
+		if (scr_viewsize.value == 110)
+			view->origin[2] += 1;
+		else if (scr_viewsize.value == 100)
+			view->origin[2] += 2;
+		else if (scr_viewsize.value == 90)
+			view->origin[2] += 1;
+		else if (scr_viewsize.value == 80)
+			view->origin[2] += 0.5;
+	}
 
 	view->model = cl.model_precache[cl.stats[STAT_WEAPON]];
 	view->frame = cl.stats[STAT_WEAPONFRAME];
@@ -899,6 +926,10 @@ void V_Init (void)
 	Cvar_RegisterVariable (&v_idlescale);
 	Cvar_RegisterVariable (&crosshair);
 	Cvar_RegisterVariable (&gl_cshiftpercent);
+	Cvar_RegisterVariable (&gl_cshiftpercent_contents); // QuakeSpasm
+	Cvar_RegisterVariable (&gl_cshiftpercent_damage); // QuakeSpasm
+	Cvar_RegisterVariable (&gl_cshiftpercent_bonus); // QuakeSpasm
+	Cvar_RegisterVariable (&gl_cshiftpercent_powerup); // QuakeSpasm
 
 	Cvar_RegisterVariable (&scr_ofsx);
 	Cvar_RegisterVariable (&scr_ofsy);
@@ -913,5 +944,7 @@ void V_Init (void)
 	Cvar_RegisterVariable (&v_kickroll);
 	Cvar_RegisterVariable (&v_kickpitch);
 	Cvar_RegisterVariable (&v_gunkick); //johnfitz
+	
+	Cvar_RegisterVariable (&r_viewmodel_quake); //MarkV
 }
 
